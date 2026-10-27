@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="Controle de gastos, contas, parcelas e reservas para casais">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Nossos Gastos">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>Nossos Gastos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">💰 <span id="nomeApp">Nossos Gastos</span></div>
+    <div class="sync" id="syncStatus"></div>
+    <button class="icon-btn claro" data-acao="config" title="Configurações" aria-label="Configurações">⚙️</button>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="painel" class="active"><span>📊</span>Painel</button>
+    <button data-tab="contas"><span>🧾</span>Contas</button>
+    <button data-tab="categorias"><span>🏷️</span>Categorias</button>
+    <button data-tab="reservas"><span>🐷</span>Reservas</button>
+    <button data-tab="sonhos"><span>🌟</span>Sonhos</button>
+  </nav>
+
+  <main>
+    <section id="tab-painel" class="tab active"></section>
+    <section id="tab-contas" class="tab"></section>
+    <section id="tab-categorias" class="tab"></section>
+    <section id="tab-reservas" class="tab"></section>
+    <section id="tab-sonhos" class="tab"></section>
+  </main>
+
+  <button class="fab" data-acao="nova-conta" title="Nova conta" aria-label="Nova conta">＋</button>
+
+  <dialog id="modal">
+    <div class="modal-head">
+      <h2 id="modalTitulo"></h2>
+      <button class="icon-btn" id="modalFechar" aria-label="Fechar">✕</button>
+    </div>
+    <div id="modalCorpo"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
