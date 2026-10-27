@@ -1,6 +1,6 @@
 // Service worker: permite instalar o app e abrir sem internet.
 // Sempre que publicar uma nova versão, aumente o número abaixo.
-const CACHE = 'nossos-gastos-v3';
+const CACHE = 'nossos-gastos-v4';
 const ARQUIVOS = [
   './',
   './index.html',

@@ -88,8 +88,11 @@ const Store = {
     setSync('conectando');
     try {
       await carregarScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+      await carregarScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js');
       await carregarScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js');
       firebase.initializeApp(window.FIREBASE_CONFIG);
+      const conta = await esperarLogin();
+      if (!usuario() && conta.displayName) localStorage.setItem('cg_usuario', conta.displayName.split(' ')[0]);
       const db = firebase.firestore();
       try { await db.enablePersistence({ synchronizeTabs: true }); } catch (e) { /* navegador sem suporte offline */ }
       this.base = db.collection('familias').doc(window.CODIGO_FAMILIA);
@@ -101,7 +104,13 @@ const Store = {
         }, err => {
           console.error(err);
           setSync('erro');
-          toast('Erro ao sincronizar: confira as regras do Firestore.');
+          if (err.code === 'permission-denied') {
+            const email = firebase.auth().currentUser?.email;
+            firebase.auth().signOut();
+            mostrarLogin(`O e-mail ${email || ''} não tem permissão para acessar este app.`);
+          } else {
+            toast('Erro ao sincronizar: confira as regras do Firestore.');
+          }
         });
       });
     } catch (e) {
@@ -196,6 +205,47 @@ const Store = {
     render();
   }
 };
+
+/* ---------- Login com Google (só os e-mails liberados nas regras do Firestore acessam) ---------- */
+function mostrarLogin(erro = '') {
+  $('#login').hidden = false;
+  $('#loginErro').textContent = erro;
+}
+
+function esperarLogin() {
+  return new Promise(resolve => {
+    const parar = firebase.auth().onAuthStateChanged(conta => {
+      if (!conta) return mostrarLogin();
+      parar();
+      $('#login').hidden = true;
+      resolve(conta);
+    });
+  });
+}
+
+async function entrarComGoogle() {
+  const provedor = new firebase.auth.GoogleAuthProvider();
+  provedor.setCustomParameters({ prompt: 'select_account' });
+  $('#loginErro').textContent = '';
+  try {
+    await firebase.auth().signInWithPopup(provedor);
+  } catch (e) {
+    console.error(e);
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+      return firebase.auth().signInWithRedirect(provedor);
+    }
+    if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
+    if (e.code === 'auth/unauthorized-domain') {
+      return mostrarLogin(`Este endereço (${location.hostname}) não está autorizado no Firebase. Veja o passo "Domínios autorizados" no COMO-PUBLICAR.md.`);
+    }
+    mostrarLogin('Não foi possível entrar. Tente novamente.');
+  }
+}
+
+function sair() {
+  if (!confirm('Sair da conta neste aparelho?')) return;
+  firebase.auth().signOut().then(() => location.reload());
+}
 
 function lerLocal(chave) {
   try { return JSON.parse(localStorage.getItem(chave) || '[]'); } catch { return []; }
@@ -1117,7 +1167,8 @@ function formConfig() {
       <div>
         <h3>Compartilhamento</h3>
         <p class="ajuda">${nuvem
-          ? `☁️ Os dados estão sendo sincronizados na nuvem (código da família: <b>${esc(window.CODIGO_FAMILIA)}</b>). Todos os aparelhos com este app veem as mesmas contas.`
+          ? `☁️ Os dados estão sincronizados na nuvem. Conectado como <b>${esc(firebase.auth().currentUser?.email || '')}</b>.
+             <button type="button" class="btn-link" id="cfgSair">Sair</button>`
           : '📱 Os dados estão salvos <b>só neste aparelho</b>. Para compartilhar com seu par, configure o Firebase seguindo o arquivo <b>COMO-PUBLICAR.md</b>.'}</p>
       </div>
       <div>
@@ -1137,6 +1188,7 @@ function formConfig() {
     toast('Nome salvo');
   });
   corpo.querySelector('#cfgNome').addEventListener('click', pedirNome);
+  corpo.querySelector('#cfgSair')?.addEventListener('click', sair);
   corpo.querySelector('#cfgExportar').addEventListener('click', exportarBackup);
   corpo.querySelector('#cfgImportar').addEventListener('click', () => corpo.querySelector('#cfgArquivo').click());
   corpo.querySelector('#cfgArquivo').addEventListener('change', e => importarBackup(e.target.files[0]));
@@ -1225,6 +1277,7 @@ document.addEventListener('click', e => {
 });
 
 // Sem nome cadastrado, a janela "Quem está usando?" não pode ser fechada
+$('#btnLogin').addEventListener('click', entrarComGoogle);
 $('#modalFechar').addEventListener('click', () => { if (usuario()) fecharModal(); });
 $('#modal').addEventListener('cancel', e => { if (!usuario()) e.preventDefault(); });
 

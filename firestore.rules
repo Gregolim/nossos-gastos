@@ -1,8 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Só os e-mails do casal, logados com Google, podem ler e gravar
     match /familias/{codigo}/{documento=**} {
-      allow read, write: if codigo == "casal-bugzn5o9ps";
+      allow read, write: if codigo == "casal-bugzn5o9ps"
+        && request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          "maiararobertogregolin20@gmail.com",
+          "anapaulapalmacosta@gmail.com"
+        ];
     }
   }
 }

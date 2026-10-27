@@ -39,21 +39,24 @@ Sem isso, cada aparelho guarda os próprios dados. Com o Firebase, os dois veem 
    ex.: `casal-silva-8f3k2q9x`.
 6. No menu do Firebase: **Criação → Firestore Database → Criar banco de dados**
    → escolha a região `southamerica-east1 (São Paulo)` → **modo de produção**.
-7. Na aba **Regras** do Firestore, apague tudo, cole o texto abaixo
-   (trocando pelo SEU código do passo 5) e clique em **Publicar**:
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /familias/{codigo}/{documento=**} {
-      allow read, write: if codigo == "casal-silva-8f3k2q9x";
-    }
-  }
-}
-```
+7. Na aba **Regras** do Firestore, apague tudo, cole o conteúdo do arquivo `firestore.rules`
+   (com o SEU código do passo 5 e os e-mails do casal) e clique em **Publicar**.
 
 8. Abra o app de novo. No topo deve aparecer **☁️ Sincronizado**.
+
+### Login com Google (protege os dados)
+
+Só os e-mails listados em `firestore.rules` conseguem ver e alterar os dados.
+
+1. Firebase → **Segurança → Authentication → Vamos começar** → aba **Método de login**
+   → **Google** → **Ativar** → escolha o e-mail de suporte → **Salvar**.
+2. Em **Authentication → Configurações → Domínios autorizados**, clique em **Adicionar domínio**
+   e coloque o domínio do site publicado (ex.: `SEU-USUARIO.github.io`). `localhost` já vem liberado.
+3. Cole o conteúdo de `firestore.rules` (com os dois e-mails) na aba **Regras** do Firestore → **Publicar**.
+4. Para incluir ou trocar alguém, edite a lista de e-mails nas regras e publique de novo.
+
+> O login não funciona abrindo o `index.html` com dois cliques (`file://`).
+> Para testar no computador use um servidor local: `npx serve .` → http://localhost:3000
 
 > Se você já tinha lançado contas antes de configurar o Firebase: antes do passo 4, use
 > ⚙️ → **Exportar backup**. Depois de configurar, use ⚙️ → **Importar backup**.

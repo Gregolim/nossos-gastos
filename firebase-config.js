@@ -17,8 +17,8 @@ window.FIREBASE_CONFIG = {
 };
 
 /*
- * Código secreto da família: todos os aparelhos que usam o mesmo código
- * veem os mesmos dados. Troque por algo difícil de adivinhar
- * (ex.: "casal-silva-8f3k2q9x") e use o MESMO código nas regras do Firestore.
+ * Código da família: pasta do banco onde ficam os dados do casal.
+ * Deve ser o MESMO usado em firestore.rules. Quem pode acessar é definido
+ * pelos e-mails liberados nas regras (login com Google), não por este código.
  */
 window.CODIGO_FAMILIA = "casal-bugzn5o9ps";
